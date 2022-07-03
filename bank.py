@@ -15,20 +15,24 @@ class Account:
     def withdraw (self,amount):
         self.amount=amount
         date=datetime.now()
+
         if amount>self.balance:
             return f"Dear {self.account_name}, you have insuffient funds for this withdraw"
         elif amount<=0:
             return f"Dear {self.account_name}, you can't withdraw zero amount "            
         else:
              self.balance -=amount
-             newdct={"date":date.strftime("%d/%m/%Y"),"amount":amount,"narration":f'thank you for withdrawing {amount} on {date}'}
+             newdct={
+                "date":date.strftime("%d/%m/%Y"),
+                "amount":amount,
+                "narration":'withdraw'}
              self.withdrawals.append(newdct)
              withdrawal_amount=self.balance-self.transaction
         if amount>withdrawal_amount:
              return "insufficient balance"
         self.balance-=amount+self.transaction
         return f"You have withdrawn Kshs.{self.withdrawals} and your new balance is {self.balance} on {date.strftime('%d/%m/%Y')}"
-              
+
       
     def deposit(self,amount):
         date=datetime.now()
@@ -38,7 +42,10 @@ class Account:
             return f"deposit amount must be greater than zero(0)"
         else:
              self.balance+=amount
-             dct={"date":date.strftime("%d/%m/%Y"),"amount":amount,"narration":f'thank you for depositing {amount} on {date}'}
+             dct={
+                "date":date.strftime("%d/%m/%Y"),
+                "amount":amount,
+                "narration":'deposit'}
              self.deposits.append(dct)
              
         return f"You have deposited Kshs.{amount} and your new balance is {self.balance}"
@@ -56,8 +63,13 @@ class Account:
     
     def full_statement(self):
         statement=self.deposits+self.withdrawals
-        for a in statement:
-            print(a["narration"])    
+        for state in statement:
+           date = state['date']
+           amount = state['amount']
+           narration = state['narration']   
+
+           print( f"{date}---{amount}----{narration}")
+
     def borrow(self,amount):
         sum=0
         for y in self.deposits:
@@ -80,22 +92,24 @@ class Account:
     
     def loan_repayment(self,amount):
         
-         if amount>self.loan_balance:
-             self.balance+=amount-self.loan_balance
-             self.loan_balance=0
-             return f" thank you for paying the loan of {amount-self.loan_balance} your account balance is {self.balance}"
+         if amount<=self.loan_balance:
+             self.loan_balance-=amount
+             
+             return f" thank you for paying the loan of {amount} your account balance is {self.loan_balance}"
                
          else:
-             self.loan_balance-=amount
-             return f"thank you and your loan balance is {self.loan_balance}"
+            overpay = amount - self.loan_balance
+            self.loan_balance+=overpay
+            self.loan_balance=0
+            return f"thank you and your loan balance is {self.loan_balance}"
             
          
     def transfer(self,amount,new_account):
-        if amount<=0:
-           return "invalid amount"
-        if amount>=self.balance:
-           return f"insuficient funds"
-        if isinstance(new_account,Account):
+        if amount<=self.balance:
             self.balance-=amount
-            new_account.balance+=amount
-            return f"you have sent {amount} to {new_account} with the name {new_account.name}.your new balance is {self.balance}"        
+            new_account.deposit(amount)
+            return f"you have sent {amount} to {new_account.account_name} with the name your new balance is {self.balance}"        
+
+        else:
+            amount>self.balance
+            return f"You have inssufficient funds to transfer {amount} to {new_account} "
